@@ -14,6 +14,7 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
+    [SerializeField] private Transform lookDown;
     [SerializeField] private float moveSpeed = 4f;
     [SerializeField] private float jumpForce = 3f;
     [SerializeField] private float maxJumpTime = 0.3f;
@@ -83,6 +84,16 @@ public class PlayerController : MonoBehaviour
         if (isGrounded)
         {
             jumpCooling = false;
+        }
+
+        if(Input.GetKeyDown(KeyCode.S))
+        {
+            lookDown.SetLocalPositionAndRotation(new Vector2(0, -5), lookDown.localRotation);
+        }
+
+        if(Input.GetKeyUp(KeyCode.S))
+        {
+            lookDown.SetLocalPositionAndRotation(new Vector2(0, 0), lookDown.localRotation);
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && (isGrounded || canAirJump))
