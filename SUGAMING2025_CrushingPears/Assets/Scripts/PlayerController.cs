@@ -63,18 +63,28 @@ public class PlayerController : MonoBehaviour
         playerStats = GetComponent<PlayerStats>();
     }
 
+    public void setSpawned(bool status)
+    {
+        animator.SetBool("hasSpawned", status);
+    }
+
+    public void setDead(bool status)
+    {
+        animator.SetBool("isDead", status);
+    }
+
     void Update()
     {
         //Debug.Log("Current Y Velocity: " + rb.velocity.y);
         animator.SetFloat("verticalVelocity", rb.velocity.y);
         animator.SetFloat("horizontalVelocity", Math.Abs(rb.velocity.x));
-        Debug.Log("Current Y Velocity: " + rb.velocity.y);
+        // Debug.Log("Current Y Velocity: " + rb.velocity.y);
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
         if (isGrounded)
         {
             jumpCooling = false;
         }
-        
+
         if (Input.GetKeyDown(KeyCode.Space) && (isGrounded || canAirJump))
         {
             isJumping = true;
@@ -116,19 +126,21 @@ public class PlayerController : MonoBehaviour
         {
             canAirJump = true;
             ledge.GetComponent<PolygonCollider2D>().sharedMaterial = superRoughMaterial;
+            ledge.GetComponent<Rigidbody2D>().sharedMaterial = superRoughMaterial;
             grabbing = true;
         }
 
-        if (ledge != null && currStamina<=0f)
+        if (ledge != null && currStamina <= 0f)
+        {
+            ledge.GetComponent<PolygonCollider2D>().sharedMaterial = slipperyMaterial;
+            ledge.GetComponent<Rigidbody2D>().sharedMaterial = superRoughMaterial;
+            if (!jumpCooling)
             {
-                ledge.GetComponent<PolygonCollider2D>().sharedMaterial = slipperyMaterial;
-                if (!jumpCooling)
-                {
-                    jumpCooling = true;
-                    JumpCooldown(5000);
-                }
-                Debug.Log("Jump Cooldown Called");
+                jumpCooling = true;
+                JumpCooldown(5000);
             }
+            Debug.Log("Jump Cooldown Called");
+        }
 
         if (Input.GetKeyUp(KeyCode.Q) && collidingWithGrab)
         {
@@ -136,6 +148,7 @@ public class PlayerController : MonoBehaviour
             if (ledge != null)
             {
                 ledge.GetComponent<PolygonCollider2D>().sharedMaterial = slipperyMaterial;
+                ledge.GetComponent<Rigidbody2D>().sharedMaterial = slipperyMaterial;
                 if (!jumpCooling)
                 {
                     jumpCooling = true;
@@ -144,6 +157,7 @@ public class PlayerController : MonoBehaviour
                 Debug.Log("Jump Cooldown Called");
             }
         }
+
 
         if (!collidingWithGrab && !isGrounded)
         {
@@ -151,6 +165,7 @@ public class PlayerController : MonoBehaviour
             if (ledge != null)
             {
                 ledge.GetComponent<PolygonCollider2D>().sharedMaterial = slipperyMaterial;
+                ledge.GetComponent<Rigidbody2D>().sharedMaterial = slipperyMaterial;
                 if (!jumpCooling)
                 {
                     jumpCooling = true;
@@ -160,6 +175,13 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        if (!collidingWithGrab)
+        {
+            if (ledge != null)
+            {
+                ledge = null;
+            }
+        }
 
         if (Input.GetKeyDown(KeyCode.E) && grabbing)
         {
@@ -186,7 +208,7 @@ public class PlayerController : MonoBehaviour
             {
                 currStamina = 0;
             }
-            StaminaBar.fillAmount = currStamina / maxStamin;
+            // StaminaBar.fillAmount = currStamina / maxStamin;
 
             if (recharge != null)
             {
@@ -204,7 +226,7 @@ public class PlayerController : MonoBehaviour
             Flip();
         }
 
-        rb.velocity = new Vector2(grabbing?(1f * moveSpeed * (m_FacingRight?1:-1)):(moveInput * moveSpeed), rb.velocity.y);
+        rb.velocity = new Vector2(grabbing ? (1f * moveSpeed * (m_FacingRight ? 1 : -1)) : (moveInput * moveSpeed), rb.velocity.y);
     }
 
     private async void JumpCooldown(int milliseconds)
@@ -237,7 +259,7 @@ public class PlayerController : MonoBehaviour
     {
         m_FacingRight = !m_FacingRight;
 
-       
+
         transform.localScale = new Vector3(
             m_FacingRight ? 1 : -1,
             transform.localScale.y,
@@ -246,16 +268,18 @@ public class PlayerController : MonoBehaviour
     }
     public void DisablePlayer()
     {
-        enabled = false;
+        setDead(true);
         GetComponent<Collider2D>().enabled = false;
         rb.velocity = Vector2.zero;
         rb.isKinematic = true;
+        enabled = false;
         GetComponent<SpriteRenderer>().enabled = false;
     }
 
     public void EnablePlayer()
     {
         enabled = true;
+        setSpawned(false);
         GetComponent<Collider2D>().enabled = true;
         rb.isKinematic = false;
         GetComponent<SpriteRenderer>().enabled = true;
