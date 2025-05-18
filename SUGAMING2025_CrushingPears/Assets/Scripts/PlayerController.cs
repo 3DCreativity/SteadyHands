@@ -219,7 +219,7 @@ public class PlayerController : MonoBehaviour
             {
                 currStamina = 0;
             }
-            // StaminaBar.fillAmount = currStamina / maxStamin;
+             StaminaBar.fillAmount = currStamina / maxStamin;
 
             if (recharge != null)
             {
