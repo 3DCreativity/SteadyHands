@@ -7,15 +7,11 @@ using UnityEngine.Events;
 public class Trigger : MonoBehaviour
 {
 
-    [SerializeField] private Collider2D collider;
     [SerializeField] private string key;
 
-    void OnCollisionEnter2D(Collision2D col)
+    public void CallDialogue()
     {
-        if (col.collider == collider)
-        {
-            //Lock Player
-            DialogueManager.Instance.StartDialogue(key);
-        }
+        DialogueManager.Instance.StartDialogue(key);
+        gameObject.SetActive(false);
     }
 }
